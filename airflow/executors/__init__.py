@@ -62,6 +62,9 @@ def _get_executor(executor_name):
     elif executor_name == 'DaskExecutor':
         from airflow.executors.dask_executor import DaskExecutor
         return DaskExecutor()
+    elif executor_name == 'DrmaaExecutor':
+        from airflow.executors.drmaa_executor import DrmaaExecutor
+        return DrmaaExecutor()
     elif executor_name == 'MesosExecutor':
         from airflow.contrib.executors.mesos_executor import MesosExecutor
         return MesosExecutor()
