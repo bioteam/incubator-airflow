@@ -13,3 +13,4 @@
 # limitations under the License.
 
 from .dask_executor import *
+from .drmaa_executor import *
