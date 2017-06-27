@@ -135,6 +135,7 @@ doc = [
     'Sphinx-PyPI-upload>=0.2.1'
 ]
 docker = ['docker-py>=1.6.0']
+drmaa = ['drmaa>=0.7.7']
 druid = ['pydruid>=0.2.1']
 emr = ['boto3>=1.0.0']
 gcp_api = [
@@ -200,7 +201,7 @@ devel = [
 ]
 devel_minreq = devel + mysql + doc + password + s3 + cgroups
 devel_hadoop = devel_minreq + hive + hdfs + webhdfs + kerberos
-devel_all = devel + all_dbs + doc + samba + s3 + slack + crypto + oracle + docker
+devel_all = devel + all_dbs + doc + samba + s3 + slack + crypto + oracle + docker + drmaa
 
 
 def do_setup():
@@ -264,6 +265,7 @@ def do_setup():
             'devel_hadoop': devel_hadoop,
             'doc': doc,
             'docker': docker,
+            'drmaa': drmaa,
             'druid': druid,
             'emr': emr,
             'gcp_api': gcp_api,
