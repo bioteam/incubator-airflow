@@ -9,6 +9,8 @@ import drmaa
 from airflow.executors.base_executor import BaseExecutor
 from airflow.utils.state import State
 
+from past.builtins import basestring
+
 
 DRMAA_TO_STATE_MAP = {
     drmaa.JobState.UNDETERMINED: None,
@@ -58,7 +60,7 @@ class DrmaaExecutor(BaseExecutor):
         jt.workingDirectory = os.getcwd()
         jt.remoteCommand = '/bin/sh'
         job_args = ['-c']
-        if isinstance(command, str):
+        if isinstance(command, basestring):
             job_args.append(command)
         else:
             job_args.append(" ".join(command))
