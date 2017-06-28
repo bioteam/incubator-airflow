@@ -21,7 +21,6 @@ mock_drmaa = mock.Mock()
 class MockDrmaaSession(mock.Mock):
     _exit_code = []
 
-    @staticmethod
     def _run_job(jt):
         try:
             subprocess.check_call([jt.remoteCommand] + jt.args)
@@ -33,7 +32,6 @@ class MockDrmaaSession(mock.Mock):
 
     jobStatus = mock.Mock(return_value=mock_drmaa.JobState.DONE)
 
-    @staticmethod
     def _wait(i, t):
         m = mock.Mock()
         m.exitStatus = MockDrmaaSession._exit_code[i]
