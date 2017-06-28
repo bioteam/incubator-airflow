@@ -2,14 +2,12 @@
 # LICENSE
 #
 
-import time
-import logging
+import sys
 import datetime
 import unittest
-import itertools
 import subprocess
 
-from airflow.models import DAG, DagBag, TaskInstance, State
+from airflow.models import DagBag, State
 from airflow.jobs import BackfillJob
 
 try:
@@ -19,20 +17,23 @@ except ImportError:
 
 mock_drmaa = mock.Mock()
 
+
 class MockDrmaaSession(mock.Mock):
     _exit_code = []
 
-    def _runJob(jt):
+    @staticmethod
+    def _run_job(jt):
         try:
             subprocess.check_call([jt.remoteCommand] + jt.args)
             MockDrmaaSession._exit_code.append(0)
         except subprocess.CalledProcessError as e:
             MockDrmaaSession._exit_code.append(e.returncode)
         return len(MockDrmaaSession._exit_code) - 1
-    runJob = mock.Mock(side_effect=_runJob)
+    runJob = mock.Mock(side_effect=_run_job)
 
     jobStatus = mock.Mock(return_value=mock_drmaa.JobState.DONE)
 
+    @staticmethod
     def _wait(i, t):
         m = mock.Mock()
         m.exitStatus = MockDrmaaSession._exit_code[i]
@@ -47,9 +48,8 @@ class MockDrmaaSession(mock.Mock):
 
 mock_drmaa.Session.side_effect = MockDrmaaSession
 
-import sys
 sys.modules['drmaa'] = mock_drmaa
-from airflow.executors.drmaa_executor import DrmaaExecutor
+from airflow.executors.drmaa_executor import DrmaaExecutor  # noqa
 
 DEFAULT_DATE = datetime.datetime(2017, 1, 1)
 
@@ -62,7 +62,7 @@ class DrmaaExecutorTest(unittest.TestCase):
             ('success', 'command', datetime.datetime.now()): 'echo 1',
             ('failure', 'command', datetime.datetime.now()): 'exit 1',
         }
-        
+
     def test_drmaa_executor_run(self):
         executor = DrmaaExecutor()
         mock_drmaa.Session()._reset()
@@ -83,7 +83,7 @@ class DrmaaExecutorTest(unittest.TestCase):
             task_instance = mock.Mock()
             task_instance.key = key
             executor.queue_command(task_instance, command)
-        
+
         executor.heartbeat()
 
         self.assertEqual(executor.session.jobStatus.call_count,

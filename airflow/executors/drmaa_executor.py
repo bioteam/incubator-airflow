@@ -3,11 +3,9 @@
 #
 
 import os
-import warnings
 
 import drmaa
 
-from airflow import configuration
 from airflow.executors.base_executor import BaseExecutor
 from airflow.utils.state import State
 
@@ -54,13 +52,13 @@ class DrmaaExecutor(BaseExecutor):
     def execute_async(self, key, command, queue=None):
         self.logger.info("[drmaa] queueing {key} through DRMAA, "
                          "queue={queue}".format(**locals()))
-        
+
         jt = self.session.createJobTemplate()
         jt.jobName = key[0]
         jt.workingDirectory = os.getcwd()
         jt.remoteCommand = '/bin/sh'
         job_args = ['-c']
-        if isinstance(command, basestring):
+        if isinstance(command, str):
             job_args.append(command)
         else:
             job_args.append(" ".join(command))
@@ -83,7 +81,7 @@ class DrmaaExecutor(BaseExecutor):
                 self.logger.info("[drmaa] {key} (id: {jid}) is {state}".format(
                     key=key, jid=jobid, state=status))
                 self.job_state[key] = DRMAA_TO_STATE_MAP[status]
-            
+
             if self.job_state[key] in State.finished():
                 # collect exit status
                 final = self.session.wait(
@@ -106,7 +104,7 @@ class DrmaaExecutor(BaseExecutor):
             [self.jobs[key] for key in self.running],
             drmaa.Session.TIMEOUT_WAIT_FOREVER,
             False)
-        
+
         self.sync()
 
     def terminate(self):
@@ -115,4 +113,3 @@ class DrmaaExecutor(BaseExecutor):
             self.session.control(jobid, drmaa.JobControlAction.TERMINATE)
 
         self.session.exit()
-        
