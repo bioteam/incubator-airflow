@@ -1993,7 +1993,7 @@ class BaseOperator(object):
             default_args=None,
             adhoc=False,
             priority_weight=1,
-            queue=configuration.get('celery', 'default_queue'),
+            queue=None,
             pool=None,
             sla=None,
             execution_timeout=None,
