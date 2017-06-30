@@ -64,7 +64,7 @@ class DrmaaExecutor(BaseExecutor):
                          "queue={queue}".format(**locals()))
 
         jt = self.session.createJobTemplate()
-        jt.jobName = re.sub(r'\W+', '', '_'.join(key))
+        jt.jobName = re.sub(r'\W+', '', '_'.join(key[:2]))
         jt.workingDirectory = configuration.get('core', 'airflow_home')
         jt.nativeSpecification = self.make_native_spec(queue)
         jt.joinFiles = False
@@ -80,10 +80,10 @@ class DrmaaExecutor(BaseExecutor):
         jt.errorPath = os.path.join(log_base, "{dag}.{date}.err".format(
             dag=key[1], date=key[2].isoformat()))
 
+        job_args = []
         if configuration.has_option('drmaa', 'wrapper_script'):
             jt.remoteCommand = configuration.get('drmaa', 'wrapper_script')
-            job_args = []
-        else:
+        if not jt.remoteCommand:
             jt.remoteCommand = '/bin/sh'
             job_args = ['-c']
         if isinstance(command, basestring):
@@ -191,7 +191,7 @@ class DrmaaExecutor(BaseExecutor):
         if mem:
             ns.append('-l mem=' + mem)
         if resources:
-            ns.append('-l other=' + resources)
+            ns.append('-l ' + resources)
         return " ".join(ns)
 
     def make_native_spec_slurm(self, queue, cpu, mem, resources):
@@ -199,7 +199,7 @@ class DrmaaExecutor(BaseExecutor):
         if queue:
             ns.append('-p ' + queue)
         if cpu:
-            ns.append('-n ' + cpu)
+            ns.append('-N 1 -n ' + cpu)
         if mem:
             ns.append('--mem-per-cpu=' + mem)
         if resources:
@@ -214,5 +214,7 @@ class DrmaaExecutor(BaseExecutor):
             ns.append('-n ' + cpu)
         if mem:
             ns.append('-M ' + mem)
+        if resources:
+            ns.append('-R ' + resources)
         return " ".join(ns)
                       
